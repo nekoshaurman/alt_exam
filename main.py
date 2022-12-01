@@ -2,11 +2,6 @@ from math import *
 import numpy as np
 import ECEF as ECEF
 
-# 1 mm = 3.793627 px
-alpha = 1 / 3.793627  # coefficient for translation mm ---> px
-
-
-# (0,0) ---> (1920/2, 1080/2) new center (960, 540)
 
 class Camera:
     def __init__(self, lat, lon, alt, roll, pitch, yaw, px, py, f, m_a, m_b):
@@ -79,7 +74,7 @@ class Camera:
         rotate_matrix = (r_z.dot(r_y)).dot(r_x)
         rotate_matrix_inverse = np.linalg.inv(rotate_matrix)
         camera_coordinates = camera.get_camera_coordinates()
-        world_coordinates = (rotate_matrix_inverse.dot(camera_coordinates)) + t
+        world_coordinates = (rotate_matrix_inverse.dot(camera_coordinates))  # + t
         print("\n", t)
         return world_coordinates
 
@@ -96,9 +91,11 @@ if __name__ == "__main__":
     pitch = 0
     yaw = 0
     camera = Camera(lat, lon, alt, roll, pitch, yaw, px, py, f, matrix_x, matrix_y)
-    print("\n Coordinates relative to the camera\n", camera.get_camera_coordinates())  # координаты одинаковые т.к. нужно скорректировать матрицу поворота
+    print("\n Coordinates relative to the camera\n",
+          camera.get_camera_coordinates())  # координаты одинаковые т.к. нужно скорректировать матрицу поворота
     print("\n", camera.get_world_coordinates())
     print("\n", ECEF.from_wgs84_to_ecef(lat, lon, alt))
-    print("\n", ECEF.from_ecef_to_wgs84(*camera.get_world_coordinates()[0], *camera.get_world_coordinates()[1], *camera.get_world_coordinates()[2]))
+    print("\n", ECEF.from_ecef_to_wgs84(*camera.get_world_coordinates()[0], *camera.get_world_coordinates()[1],
+                                        *camera.get_world_coordinates()[2]))
 
     # Что-то почти доделал, надо разобраться какие тестовые ролл питч и йа установить
