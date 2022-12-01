@@ -65,8 +65,8 @@ class Camera:
         # print("\n", from_pixel_to_camera)
         camera_coordinates = camera_coordinates * self.alt
         # print("\n", from_pixel_to_camera)
-        camera_coordinates[0][0] = camera_coordinates[0][0] / 1000
-        camera_coordinates[1][0] = camera_coordinates[1][0] / 1000
+        camera_coordinates[0][0] /= 1000
+        camera_coordinates[1][0] /= 1000
         return camera_coordinates
 
     # Точка в мировых координатах
@@ -108,19 +108,20 @@ class Camera:
 
 
 if __name__ == "__main__":
-    f = 50  # 50mm
+    f = 530  # 50mm
     matrix_x, matrix_y = 1920, 1080  # in px
-    px = 80
-    py = 320
-    lat = 59.973017  # degrees
+    px = 450
+    py = 580
+    lat = 59.973017000000006  # degrees
     lon = 30.220557  # degrees
     alt = 50
     roll = 0
     pitch = 0
     yaw = 0
     camera = Camera(lat, lon, alt, roll, pitch, yaw, px, py, f, matrix_x, matrix_y)
-    print("\n Coordinates relative to the camera", camera.get_camera_coordinates())  # координаты одинаковые т.к. нужно скорректировать матрицу поворота
-    print("\n", camera.get_world_coordinates())  # щас считается что мировые координаты и камеры одни и те же
+    print("\n Coordinates relative to the camera\n", camera.get_camera_coordinates())  # координаты одинаковые т.к. нужно скорректировать матрицу поворота
+    print("\n", camera.get_world_coordinates())
     print("\n", ECEF.from_wgs84_to_ecef(lat, lon, alt))
+    print("\n", ECEF.from_ecef_to_wgs84(*camera.get_world_coordinates()[0], *camera.get_world_coordinates()[1], *camera.get_world_coordinates()[2]))
 
-    # Короче почти чота доделал, надо разобраться какие тестовые ролл питч и йа установить
+    # Что-то почти доделал, надо разобраться какие тестовые ролл питч и йа установить
