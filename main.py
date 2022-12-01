@@ -21,29 +21,6 @@ class Camera:
         self.matrix_y = m_b  # matrix side, px
         self.pixel_x = px  # px - matrix_x/2  # pixel X coordinate in the image, px
         self.pixel_y = py  # (py - matrix_y/2) * (-1)  # pixel Y coordinate in the image, px
-        self.bearing = 0
-        self.x = self.get_x_position()  # camera see on the ground
-        self.y = self.get_y_position()  # camera see on the ground
-
-    # Camera position x
-    def get_x_position(self):
-        if self.focus != 0:
-            return (self.pixel_x * alpha * self.alt) / (1000 * self.focus)
-        else:
-            return 0
-
-    # Camera position y
-    def get_y_position(self):
-        if self.focus != 0:
-            return (self.pixel_y * alpha * self.alt) / (1000 * self.focus)
-        else:
-            return 0
-
-    # Distance to object
-    def get_distance(self):
-        ix = self.lat + self.x
-        iy = self.lon + self.y
-        return sqrt(pow(ix, 2) + pow(iy, 2))
 
     # Точка в координатах камеры
     def get_camera_coordinates(self):
