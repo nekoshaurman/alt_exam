@@ -1,5 +1,6 @@
 from math import *
 import numpy as np
+import ECEF as ECEF
 
 # 1 mm = 3.793627 px
 alpha = 1 / 3.793627  # coefficient for translation mm ---> px
@@ -9,8 +10,8 @@ alpha = 1 / 3.793627  # coefficient for translation mm ---> px
 
 class Camera:
     def __init__(self, lat, lon, alt, roll, pitch, yaw, px, py, f, m_a, m_b):
-        self.lat = radians(lat)  # latitude(deg)
-        self.lon = radians(lon)  # longitude(deg)
+        self.lat = lat  # radians(lat)  # latitude(deg)
+        self.lon = lon  # radians(lon)  # longitude(deg)
         self.alt = alt  # altitude(meters)
         self.roll = roll  # roll(degrees)
         self.pitch = pitch  # pitch(degrees)
@@ -73,38 +74,53 @@ class Camera:
         a = self.yaw  # Надо прикрутить им всем коррекцию по ECEF либо новые переменные для этого юзать
         b = self.pitch
         g = self.roll
+        camera_x_ecef, camera_y_ecef, camera_z_ecef = ECEF.from_wgs84_to_ecef(self.lat, self.lon, self.alt)
+        # coordinates of camera in world coordinates
+        t = np.array([
+            [camera_x_ecef],
+            [camera_y_ecef],
+            [camera_z_ecef]
+        ])
+        # clockwise yaw
         r_z = np.array([
             [cos(a), -sin(a), 0],
             [sin(a), cos(a), 0],
             [0, 0, 1]
-        ])  # clockwise yaw
+        ])
+        # counterclockwise pitch
         r_y = np.array([
             [cos(b), 0, sin(b)],
             [0, 1, 0],
             [-sin(b), 0, cos(b)]
-        ])  # counterclockwise pitch
+        ])
+        # counterclockwise roll
         r_x = np.array([
             [1, 0, 0],
             [0, cos(g), -sin(g)],
             [0, sin(g), cos(g)]
-        ])  # counterclockwise roll
+        ])
         rotate_matrix = (r_z.dot(r_y)).dot(r_x)
         rotate_matrix_inverse = np.linalg.inv(rotate_matrix)
         camera_coordinates = camera.get_camera_coordinates()
-        world_coordinates = rotate_matrix_inverse.dot(camera_coordinates)
+        world_coordinates = (rotate_matrix_inverse.dot(camera_coordinates)) + t
+        print("\n", t)
         return world_coordinates
 
+
 if __name__ == "__main__":
-    f = 530  # 50mm
+    f = 50  # 50mm
     matrix_x, matrix_y = 1920, 1080  # in px
     px = 80
     py = 320
     lat = 59.973017  # degrees
     lon = 30.220557  # degrees
-    alt = 53
+    alt = 50
     roll = 0
     pitch = 0
     yaw = 0
     camera = Camera(lat, lon, alt, roll, pitch, yaw, px, py, f, matrix_x, matrix_y)
-    print("\n", camera.get_camera_coordinates())  # координаты одинаковые т.к. нужно скорректировать матрицу поворота
+    print("\n Coordinates relative to the camera", camera.get_camera_coordinates())  # координаты одинаковые т.к. нужно скорректировать матрицу поворота
     print("\n", camera.get_world_coordinates())  # щас считается что мировые координаты и камеры одни и те же
+    print("\n", ECEF.from_wgs84_to_ecef(lat, lon, alt))
+
+    # Короче почти чота доделал, надо разобраться какие тестовые ролл питч и йа установить
