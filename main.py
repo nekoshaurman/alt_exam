@@ -43,9 +43,9 @@ class Camera:
 
     # Точка в мировых координатах
     def get_world_coordinates(self):
-        a = self.yaw  # Надо прикрутить им всем коррекцию по ECEF либо новые переменные для этого юзать
-        b = self.pitch
-        g = self.roll
+        a = 180 + self.lon  # Надо прикрутить им всем коррекцию по ECEF либо новые переменные для этого юзать
+        b = 90 - self.lat
+        g = 0
         camera_x_ecef, camera_y_ecef, camera_z_ecef = ECEF.from_wgs84_to_ecef(self.lat, self.lon, self.alt)
         # coordinates of camera in world coordinates
         t = np.array([
@@ -82,20 +82,14 @@ class Camera:
 if __name__ == "__main__":
     f = 530  # 50mm
     matrix_x, matrix_y = 1920, 1080  # in px
-    px = 450
-    py = 580
-    lat = 59.973017000000006  # degrees
+    px = 1000
+    py = 1000
+    lat = 59.973017 # degrees
     lon = 30.220557  # degrees
     alt = 50
     roll = 0
-    pitch = 0
-    yaw = 0
+    pitch = 59.973017
+    yaw = 30.220557
     camera = Camera(lat, lon, alt, roll, pitch, yaw, px, py, f, matrix_x, matrix_y)
-    print("\n Coordinates relative to the camera\n",
-          camera.get_camera_coordinates())  # координаты одинаковые т.к. нужно скорректировать матрицу поворота
+    print("\n Coordinates relative to the camera\n", camera.get_camera_coordinates())
     print("\n", camera.get_world_coordinates())
-    print("\n", ECEF.from_wgs84_to_ecef(lat, lon, alt))
-    print("\n", ECEF.from_ecef_to_wgs84(*camera.get_world_coordinates()[0], *camera.get_world_coordinates()[1],
-                                        *camera.get_world_coordinates()[2]))
-
-    # Что-то почти доделал, надо разобраться какие тестовые ролл питч и йа установить
