@@ -42,10 +42,10 @@ class Camera:
         camera_coordinates[1][0] /= 1000
         return camera_coordinates
 
-    def rotating_axes(self):
+    def get_rotating_axes(self): #NOT READY YET
         a = -self.lon
         b = -2 * self.lat
-        c = 180
+        c = self.lon + 180
         # clockwise camera yaw
         r_z = np.array([
             [cos(a), -sin(a), 0],
@@ -65,7 +65,7 @@ class Camera:
             [0, 0, 1]
         ])
         rotate_matrix = (r_z.dot(r_y)).dot(r_z2)
-        return rotate_matrix
+        return rotate_matrix #
 
     # Точка в мировых координатах
     def get_world_coordinates(self):
@@ -99,9 +99,11 @@ class Camera:
         ])
         rotate_matrix = (r_z.dot(r_y)).dot(r_x)
         rotate_matrix_inverse = np.linalg.inv(rotate_matrix)
+
         camera_coordinates = camera.get_camera_coordinates()
         camera_coordinates_ecef = rotate_matrix_inverse.dot(camera_coordinates)
 
+        rotate_matrix_2 = camera.get_rotating_axes()
 
         world_coordinates = camera_coordinates_ecef + t
         print("\n", t)
@@ -109,7 +111,7 @@ class Camera:
 
 
 if __name__ == "__main__":
-    f = 530  # 50mm
+    f =   # 50mm
     matrix_x, matrix_y = 1920, 1080  # in px
     px = 1000
     py = 1000
@@ -122,3 +124,4 @@ if __name__ == "__main__":
     camera = Camera(lat, lon, alt, roll, pitch, yaw, px, py, f, matrix_x, matrix_y)
     print("\n Coordinates relative to the camera\n", camera.get_camera_coordinates())
     print("\n", camera.get_world_coordinates())
+    print("\n", ECEF.from_ecef_to_wgs84(*camera.get_world_coordinates()[0], *camera.get_world_coordinates()[1], *camera.get_world_coordinates()[2]))
