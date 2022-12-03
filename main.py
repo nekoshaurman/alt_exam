@@ -19,8 +19,9 @@ class Camera:
 
     # Точка в координатах камеры
     def get_camera_coordinates(self):
+        skew = 0
         intrinsic_matrix = np.array([
-            [self.focus, 0, self.matrix_x / 2],
+            [self.focus, skew, self.matrix_x / 2],
             [0, self.focus, self.matrix_y / 2],
             [0, 0, 1]
         ])
@@ -41,11 +42,36 @@ class Camera:
         camera_coordinates[1][0] /= 1000
         return camera_coordinates
 
+    def rotating_axes(self):
+        a = -self.lon
+        b = -2 * self.lat
+        c = 180
+        # clockwise camera yaw
+        r_z = np.array([
+            [cos(a), -sin(a), 0],
+            [sin(a), cos(a), 0],
+            [0, 0, 1]
+        ])
+        # counterclockwise camera pitch
+        r_y = np.array([
+            [cos(b), 0, sin(b)],
+            [0, 1, 0],
+            [-sin(b), 0, cos(b)]
+        ])
+        # counterclockwise camera yaw 2
+        r_z2 = np.array([
+            [cos(c), -sin(c), 0],
+            [sin(c), cos(c), 0],
+            [0, 0, 1]
+        ])
+        rotate_matrix = (r_z.dot(r_y)).dot(r_z2)
+        return rotate_matrix
+
     # Точка в мировых координатах
     def get_world_coordinates(self):
-        a = 180 + self.lon  # Надо прикрутить им всем коррекцию по ECEF либо новые переменные для этого юзать
-        b = 90 - self.lat
-        g = 0
+        yaw = -self.yaw
+        pitch = -self.pitch
+        roll = -self.roll
         camera_x_ecef, camera_y_ecef, camera_z_ecef = ECEF.from_wgs84_to_ecef(self.lat, self.lon, self.alt)
         # coordinates of camera in world coordinates
         t = np.array([
@@ -53,28 +79,31 @@ class Camera:
             [camera_y_ecef],
             [camera_z_ecef]
         ])
-        # clockwise yaw
+        # clockwise camera yaw
         r_z = np.array([
-            [cos(a), -sin(a), 0],
-            [sin(a), cos(a), 0],
+            [cos(yaw), -sin(yaw), 0],
+            [sin(yaw), cos(yaw), 0],
             [0, 0, 1]
         ])
-        # counterclockwise pitch
+        # counterclockwise camera pitch
         r_y = np.array([
-            [cos(b), 0, sin(b)],
+            [cos(pitch), 0, sin(pitch)],
             [0, 1, 0],
-            [-sin(b), 0, cos(b)]
+            [-sin(pitch), 0, cos(pitch)]
         ])
-        # counterclockwise roll
+        # counterclockwise camera roll
         r_x = np.array([
             [1, 0, 0],
-            [0, cos(g), -sin(g)],
-            [0, sin(g), cos(g)]
+            [0, cos(roll), -sin(roll)],
+            [0, sin(roll), cos(roll)]
         ])
         rotate_matrix = (r_z.dot(r_y)).dot(r_x)
         rotate_matrix_inverse = np.linalg.inv(rotate_matrix)
         camera_coordinates = camera.get_camera_coordinates()
-        world_coordinates = (rotate_matrix_inverse.dot(camera_coordinates))  # + t
+        camera_coordinates_ecef = rotate_matrix_inverse.dot(camera_coordinates)
+
+
+        world_coordinates = camera_coordinates_ecef + t
         print("\n", t)
         return world_coordinates
 
@@ -88,8 +117,8 @@ if __name__ == "__main__":
     lon = 30.220557  # degrees
     alt = 50
     roll = 0
-    pitch = 59.973017
-    yaw = 30.220557
+    pitch = 0
+    yaw = 0
     camera = Camera(lat, lon, alt, roll, pitch, yaw, px, py, f, matrix_x, matrix_y)
     print("\n Coordinates relative to the camera\n", camera.get_camera_coordinates())
     print("\n", camera.get_world_coordinates())
