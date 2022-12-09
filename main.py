@@ -69,9 +69,9 @@ class Camera:
 
     # Точка в мировых координатах
     def get_world_coordinates(self):
-        yaw = -self.yaw
-        pitch = -self.pitch
-        roll = -self.roll
+        yaw = 0
+        pitch = 0
+        roll = 0
         camera_x_ecef, camera_y_ecef, camera_z_ecef = ECEF.from_wgs84_to_ecef(self.lat, self.lon, self.alt)
         # coordinates of camera in world coordinates
         t = np.array([
@@ -111,7 +111,7 @@ class Camera:
 
 
 if __name__ == "__main__":
-    f =   # 50mm
+    f = 1000
     matrix_x, matrix_y = 1920, 1080  # in px
     px = 1000
     py = 1000
