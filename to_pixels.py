@@ -1,4 +1,4 @@
-import main
+ import main
 import numpy as np
 import ECEF as ECEF
 
@@ -35,6 +35,7 @@ class Camera:
         extrinsic_matrix = np.array([])
 
         pixel_coord = (intrinsic_matrix.dot(extrinsic_matrix)).dot(world_coordinates_ecef)
+
 
 if __name__ == "__main__":
     f = 1000

@@ -49,29 +49,15 @@ class Camera:
             [drone_y_ecef],
             [drone_z_ecef]
         ])
-        # clockwise camera yaw
-        r_z = np.array([
-            [cos(yaw), -sin(yaw), 0],
-            [sin(yaw), cos(yaw), 0],
-            [0, 0, 1]
+        # ecef 2 ned
+        rotate_matrix = np.array([
+            [-sin(self.lat)*cos(self.lon), -sin(self.lat)*sin(self.lon), cos(self.lat)],
+            [-sin(self.lon), cos(self.lon), 0],
+            [-cos(self.lat)*cos(self.lon), -cos(self.lat)*sin(self.lon), -sin(self.lat)]
         ])
-        # counterclockwise camera pitch
-        r_y = np.array([
-            [cos(pitch), 0, sin(pitch)],
-            [0, 1, 0],
-            [-sin(pitch), 0, cos(pitch)]
-        ])
-        # counterclockwise camera roll
-        r_x = np.array([
-            [1, 0, 0],
-            [0, cos(roll), -sin(roll)],
-            [0, sin(roll), cos(roll)]
-        ])
-        rotate_matrix = (r_z.dot(r_y)).dot(r_x)
-        rotate_matrix_inverse = np.linalg.inv(rotate_matrix)
 
         camera_coordinates = camera.get_camera_coordinates()
-        camera_coordinates_ecef = rotate_matrix_inverse.dot(camera_coordinates)
+        camera_coordinates_ecef = rotate_matrix.dot(camera_coordinates)
 
         world_coordinates_ecef = camera_coordinates_ecef + t
 
